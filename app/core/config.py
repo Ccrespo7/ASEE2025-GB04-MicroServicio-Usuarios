@@ -1,13 +1,12 @@
 import os
-from pydantic import BaseSettings
+from dotenv import load_dotenv
 
-class Settings(BaseSettings):
-    APP_NAME: str = "Usuarios API"
-    DATABASE_URL: str = "mysql+pymysql://root:password@localhost:3306/music_usuarios"
-    JWT_SECRET: str = "supersecret"
-    JWT_ALGORITHM: str = "HS256"
+load_dotenv()
 
-    class Config:
-        env_file = ".env"
+DB_USER = os.getenv("POSTGRES_USER", "postgres")
+DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "password")
+DB_HOST = os.getenv("POSTGRES_HOST", "localhost")
+DB_PORT = os.getenv("POSTGRES_PORT", "5432")
+DB_NAME = os.getenv("POSTGRES_DB", "usuarios_db")
 
-settings = Settings()
+DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"

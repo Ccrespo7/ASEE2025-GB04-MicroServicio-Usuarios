@@ -5,3 +5,5 @@ sqlalchemy
 python-jose
 passlib[bcrypt]
 pymysql
+psycopg2-binary
+python-dotenv
