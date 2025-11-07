@@ -9,9 +9,11 @@ class UserBase(BaseModel):
     is_admin: bool = False
 
 class UserCreate(BaseModel):
-    email: EmailStr
+    email: str
     password: str
     display_name: str
+    full_name: str
+    age: Optional[int] = None
 
 class UserResponse(BaseModel):
     email: str
