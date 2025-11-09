@@ -27,9 +27,10 @@ def validate_image(file: UploadFile) -> bool:
         )
     return True
 
-async def save_avatar(file: UploadFile, user_email: str) -> str:
+async def save_avatar(file: UploadFile, user_email: str, old_avatar_url: Optional[str] = None) -> str:
     """
     Guarda la imagen de perfil y retorna la URL relativa
+    Si existe un avatar anterior, lo elimina
     """
     if not file:
         return None
@@ -54,6 +55,10 @@ async def save_avatar(file: UploadFile, user_email: str) -> str:
             f.write(content)
         
         print(f"✅ Imagen guardada en: {file_path.absolute()}")
+        
+        # Eliminar avatar anterior si existe
+        if old_avatar_url:
+            delete_avatar(old_avatar_url)
         
         # Retornar URL relativa
         return f"/uploads/avatars/{unique_filename}"

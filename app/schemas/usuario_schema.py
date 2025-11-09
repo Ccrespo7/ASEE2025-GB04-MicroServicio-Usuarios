@@ -16,6 +16,12 @@ class UserCreate(BaseModel):
     age: Optional[int] = None
     avatar_url: Optional[str] = None
 
+class UserUpdate(BaseModel):
+    """Schema para actualización de usuario"""
+    display_name: Optional[str] = None
+    password: Optional[str] = None
+    avatar_url: Optional[str] = None
+
 class UserResponse(BaseModel):
     email: str
     display_name: str
