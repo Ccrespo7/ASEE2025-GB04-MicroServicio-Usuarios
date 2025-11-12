@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 from app.schemas.usuario_schema import UserCreate, UserResponse
-from app.services.auth_service import register_user, get_user_by_email
+from app.services.usuario_service import register_user, get_user_by_email
 from app.services.image_service import save_avatar
 from app.core.database import get_db
 
