@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
@@ -16,6 +16,9 @@ from app.dao.artista_dao import (
 from app.factories.artista_factory import build_artista_model
 from app.core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
+# --- CONSTANTE DEFINIDA PARA SONARCLOUD ---
+ARTIST_NOT_FOUND_MSG = "Artista no encontrado"
+
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 def get_password_hash(password: str):
@@ -27,9 +30,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -54,14 +57,16 @@ def register_artista(data: ArtistCreate, db: Session):
 def get_artista_by_email(email: str, db: Session):
     artista = dao_get_artista_by_email(db, email)
     if not artista:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Artista no encontrado")
+        # USO DE LA CONSTANTE
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=ARTIST_NOT_FOUND_MSG)
     return artista
 
 def update_artista_service(email: str, data: ArtistUpdate, db: Session):
     # 1. Buscar al artista
     artista = dao_get_artista_by_email(db, email)
     if not artista:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Artista no encontrado")
+        # USO DE LA CONSTANTE
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=ARTIST_NOT_FOUND_MSG)
 
     # 2. Convertir a diccionario
     update_data = data.dict()
@@ -88,7 +93,8 @@ def delete_artista_service(email: str, db: Session):
     """Elimina un artista por email si existe"""
     artista = dao_get_artista_by_email(db, email)
     if not artista:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Artista no encontrado")
+        # USO DE LA CONSTANTE
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=ARTIST_NOT_FOUND_MSG)
     
     dao_delete_artista(db, artista)
     return {"message": "Artista eliminado correctamente"}

@@ -1,8 +1,10 @@
 import os
 import uuid
+import aiofiles
 from pathlib import Path
 from fastapi import UploadFile, HTTPException
 from typing import Optional
+
 
 # Directorio donde se guardarán las imágenes
 UPLOAD_DIR = Path("uploads/avatars")
@@ -27,7 +29,7 @@ def validate_image(file: UploadFile) -> bool:
         )
     return True
 
-async def save_avatar(file: UploadFile, user_email: str, old_avatar_url: Optional[str] = None) -> str:
+async def save_avatar(file: UploadFile, user_email: str, old_avatar_url: Optional[str] = None) -> Optional[str]:
     """
     Guarda la imagen de perfil y retorna la URL relativa
     Si existe un avatar anterior, lo elimina
@@ -43,16 +45,18 @@ async def save_avatar(file: UploadFile, user_email: str, old_avatar_url: Optiona
     unique_filename = f"{user_email.replace('@', '_').replace('.', '_')}_{uuid.uuid4().hex[:8]}.{extension}"
     file_path = UPLOAD_DIR / unique_filename
     
-    # Guardar archivo
+    # Guardar archivo de forma asíncrona
     try:
+        # Leemos el contenido (esto ya es async)
         content = await file.read()
         
         # Validar tamaño
         if len(content) > MAX_FILE_SIZE:
             raise HTTPException(status_code=400, detail="El archivo es demasiado grande (máx 5MB)")
         
-        with open(file_path, "wb") as f:
-            f.write(content)
+        # Escritura asíncrona con aiofiles para SonarCloud
+        async with aiofiles.open(file_path, "wb") as f:
+            await f.write(content)
         
         print(f"✅ Imagen guardada en: {file_path.absolute()}")
         
